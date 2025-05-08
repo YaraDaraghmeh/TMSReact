@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { useMutation, gql } from '@apollo/client';
+import { useMutation, gql, useApolloClient } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 
-// 1. تغيير من Query إلى Mutation
 const LOGIN_MUTATION = gql`
   mutation Login($username: String!, $password: String!) {
     login(username: $username, password: $password) {
@@ -24,6 +23,7 @@ const Login: React.FC = () => {
   const [staySignedIn, setStaySignedIn] = useState(false);
   const [login, { loading, error }] = useMutation(LOGIN_MUTATION);
   const navigate = useNavigate();
+  const client = useApolloClient(); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,9 +36,9 @@ const Login: React.FC = () => {
         }
       });
 
-      // 2. معالجة البيانات الجديدة من Mutation
       const { token, user } = data.login;
 
+   
       if (staySignedIn) {
         localStorage.setItem('token', token);
         localStorage.setItem('currentUser', JSON.stringify(user));
@@ -47,15 +47,17 @@ const Login: React.FC = () => {
         sessionStorage.setItem('currentUser', JSON.stringify(user));
       }
 
-      // 3. التوجيه حسب الدور
-      if (user.role === 'Administrator' ) {
+     
+      await client.resetStore();
+
+     
+      if (user.role === 'Administrator') {
         navigate('/dashboard');
-      }
-      if(user.role === 'Student'){
+      } else if (user.role === 'Student') {
         navigate('/dashboard2');
       }
     } catch (err) {
-      alert('❌ اسم المستخدم أو كلمة المرور غير صحيحة.');
+      alert('incorrect password or username ❌ ');
       console.error('Login error:', err);
     }
   };

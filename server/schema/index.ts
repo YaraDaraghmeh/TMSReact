@@ -6,7 +6,10 @@ import {
 } from 'graphql';
 import User from './User.js';
 import mongoose from 'mongoose';
-// تعريف نوع UserPayload
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+
+
 const UserPayloadType = new GraphQLObjectType({
   name: 'UserPayload',
   fields: {
@@ -18,7 +21,7 @@ const UserPayloadType = new GraphQLObjectType({
   }
 });
 
-// تعريف نوع AuthPayload
+
 const AuthPayloadType = new GraphQLObjectType({
   name: 'AuthPayload',
   fields: {
@@ -43,15 +46,23 @@ const RootMutation = new GraphQLObjectType({
           throw new Error('User not found');
         }
 
-        // تأكد من أن user._id موجود وأنه من النوع الصحيح
-        if (!user._id || !(user._id instanceof mongoose.Types.ObjectId)) {
-          throw new Error('Invalid user ID');
+       
+        const isMatch = await bcrypt.compare(args.password, user.password);
+        if (!isMatch) {
+          throw new Error('Invalid credentials');
         }
 
+    
+        const token = jwt.sign(
+          { userId: user._id, role: user.role },
+          process.env.JWT_SECRET as string,
+          { expiresIn: '1d' }
+        );
+
         return {
-          token: 'generated-jwt-token', // استبدل هذا بإنشاء JWT حقيقي
+          token,
           user: {
-            id: user._id.toString(),
+            id: (user._id as mongoose.Types.ObjectId).toString() ,
             username: user.username,
             name: user.name,
             role: user.role,

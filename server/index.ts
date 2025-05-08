@@ -4,21 +4,47 @@ import dotenv from 'dotenv';
 import { graphqlHTTP } from 'express-graphql';
 import schema from './schema/index.js';
 import cors from 'cors';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// GraphQL Endpoint
-app.use('/graphql', graphqlHTTP({
+
+const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader) {
+    return next(); 
+  }
+
+  const token = authHeader.split(' ')[1]; 
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    (req as any).user = decoded; 
+    next();
+  } catch (err) {
+    console.error('Invalid token:', err);
+    return next(); 
+  }
+};
+
+app.use(authMiddleware);
+
+
+app.use('/graphql', graphqlHTTP((req) => ({
   schema,
-  graphiql: true
-}));
+  graphiql: true,
+  context: {
+    user: (req as any).user 
+  }
+})));
 
 // Test route
 app.get('/', (req, res) => {

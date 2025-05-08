@@ -1,4 +1,3 @@
-// src/services/apolloClient.ts
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
@@ -7,7 +6,9 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('token');
+
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  
   return {
     headers: {
       ...headers,
@@ -16,9 +17,9 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const apolloClient = new ApolloClient({ // تغيير اسم المتغير
+const apolloClient = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache()
 });
 
-export default apolloClient; // استخدام التصدير الافتراضي
+export default apolloClient;

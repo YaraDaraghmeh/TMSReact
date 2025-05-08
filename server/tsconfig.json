@@ -10,6 +10,6 @@
     "moduleResolution": "node",
     "types": ["node"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "migratePasswords.js"],
   "exclude": ["node_modules"]
 }
