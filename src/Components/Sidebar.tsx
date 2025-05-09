@@ -64,7 +64,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             key={tab.id}
             to={
               tab.id === 'homeBtn' ? '/' :
-              tab.id === 'projectsBtn' ? '/projects' :
+              tab.id === 'projectsBtn' ? '/project' :
               tab.id === 'tasksBtn' ? '/tasks' :
               '/chat'
             }

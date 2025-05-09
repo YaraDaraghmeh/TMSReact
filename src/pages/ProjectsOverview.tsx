@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import ProjectCard from '../ProjectCard/ProjectCard';
-import { projectsData } from '../../Data/projectsData';
-import AddProjectModal from '../AddingNewProject/AddProjectModal';
-import ProjectDetailPopup from '../ProjectCard/ProjectDetailPopup';
+import ProjectCard from '../Components/ProjectCard/ProjectCard';
+import { projectsData } from '../Data/projectsData';
+import AddProjectModal from '../Components/AddingNewProject/AddProjectModal';
+import ProjectDetailPopup from '../Components/ProjectCard/ProjectDetailPopup';
 
 const ProjectsOverview = () => {
   const [searchTerm, setSearchTerm] = useState('');
