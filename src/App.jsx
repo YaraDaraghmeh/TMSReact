@@ -2,15 +2,22 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './Components/Login';
 import { ApolloProvider } from '@apollo/client';
 import client from './services/apolloClient';
+import Dashboard from './pages/Dashboard';
+import MainLayout from './Components/MainLayout';
 
 function App() {
   return (
     <ApolloProvider client={client}>
       <Router>
         <Routes>
+          {/* Login */}
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<div>Coming soon!</div>} />
-          <Route path="/dashboard2" element={<div>Coming soon222!</div>} />
+
+          {/* inside Layout */}
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
         </Routes>
       </Router>
     </ApolloProvider>
