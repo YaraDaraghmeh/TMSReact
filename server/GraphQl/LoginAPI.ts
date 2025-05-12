@@ -4,7 +4,7 @@ import {
   GraphQLString,
   GraphQLNonNull
 } from 'graphql';
-import User from './User.js';
+import User from '../schema/User.js';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';

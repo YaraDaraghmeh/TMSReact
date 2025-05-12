@@ -2,19 +2,19 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { graphqlHTTP } from 'express-graphql';
-import schema from './schema/index.js';
+import { mergeSchemas } from '@graphql-tools/schema';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
+import loginSchema from './GraphQl/LoginAPI.js';
+import taskSchema from './GraphQl/TaskAPI.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-
 app.use(cors());
 app.use(express.json());
-
 
 const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -37,9 +37,13 @@ const authMiddleware = (req: express.Request, res: express.Response, next: expre
 
 app.use(authMiddleware);
 
+// إنشاء schema موحدة
+const mergedSchema = mergeSchemas({
+  schemas: [loginSchema, taskSchema]
+});
 
 app.use('/graphql', graphqlHTTP((req) => ({
-  schema,
+  schema: mergedSchema,
   graphiql: true,
   context: {
     user: (req as any).user 

@@ -52,7 +52,7 @@ const Login: React.FC = () => {
 
      
       if (user.role === 'Administrator') {
-        navigate('/dashboard');
+        navigate('/Task');
       } else if (user.role === 'Student') {
         navigate('/dashboard2');
       }
