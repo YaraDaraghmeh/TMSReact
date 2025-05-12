@@ -54,13 +54,14 @@ const Login: React.FC = () => {
       if (user.role === 'Administrator') {
         navigate('/Task');
       } else if (user.role === 'Student') {
-        navigate('/dashboard2');
+        navigate('/dashboard');
       }
     } catch (err) {
       alert('incorrect password or username ❌ ');
       console.error('Login error:', err);
     }
   };
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-950">
