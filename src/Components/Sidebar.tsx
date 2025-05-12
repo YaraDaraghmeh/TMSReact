@@ -63,9 +63,9 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
           <Link
             key={tab.id}
             to={
-              tab.id === 'homeBtn' ? '/' :
+              tab.id === 'homeBtn' ? '/dashboard' :
               tab.id === 'projectsBtn' ? '/project' :
-              tab.id === 'tasksBtn' ? '/tasks' :
+              tab.id === 'tasksBtn' ? '/Task' :
               '/chat'
             }
             onClick={() => setActiveTab(tab.id)}

@@ -4,9 +4,8 @@ import { useQuery } from '@apollo/client';
 import { DASHBOARD_COUNTS_QUERY } from '../graphql/queries';
 
 export default function Dashboard() {
-  const [user, setUser] = useState<{ username: string; name: string; role: string } | undefined>(undefined);
-
   const { data, loading } = useQuery(DASHBOARD_COUNTS_QUERY);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser");
@@ -21,10 +20,11 @@ export default function Dashboard() {
     hour: '2-digit', minute: '2-digit', second: '2-digit',
   });
 
-  const projectsCount = data?.projectCount || 0;
-  const tasksCount = data?.taskCount || 0;
-  const studentsCount = data?.studentCount || 0;
-  const finishedCount = data?.finishedProjectCount || 0;
+  const stats = data?.stats || {};
+  const projectsCount = parseInt(stats.totalProjects) || 0;
+  const tasksCount = parseInt(stats.totalTasks) || 0;
+  const studentsCount = parseInt(stats.totalStudents) || 0;
+  const finishedCount = parseInt(stats.finishedProjects) || 0;
 
   const dataReady = [projectsCount, studentsCount, tasksCount, finishedCount].every(Number.isFinite);
 
@@ -58,7 +58,7 @@ export default function Dashboard() {
       {/* الرسم البياني */}
       {dataReady && (
         <DashboardChart
-          user={user}  // تمرير بيانات المستخدم إلى الرسم البياني
+          user={user}
           data={[projectsCount, studentsCount, tasksCount, finishedCount]}
         />
       )}

@@ -7,6 +7,7 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import loginSchema from './GraphQl/LoginAPI.js';
 import taskSchema from './GraphQl/TaskAPI.js';
+import homeSchema from './GraphQl/HomeAPI.js';
 
 dotenv.config();
 
@@ -39,7 +40,7 @@ app.use(authMiddleware);
 
 // إنشاء schema موحدة
 const mergedSchema = mergeSchemas({
-  schemas: [loginSchema, taskSchema]
+  schemas: [loginSchema, taskSchema,homeSchema]
 });
 
 app.use('/graphql', graphqlHTTP((req) => ({
