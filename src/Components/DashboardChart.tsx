@@ -7,21 +7,25 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 interface DashboardChartProps {
   user: { name: string; role: string } | undefined;
   data: number[];
+  labels: string[];
+  backgroundColor?: string[];
 }
 
-export default function DashboardChart({ user, data }: DashboardChartProps) {
+
+export default function DashboardChart({ user, data, labels, backgroundColor }: DashboardChartProps) {
   const chartData = {
-    labels: ['Projects', 'Students', 'Tasks', 'Finished Projects'],
+    labels: labels,
     datasets: [
       {
         label: 'Count',
         data: data,
-        backgroundColor: ['#3467eb', '#ccc', '#252525', '#ccc'],
+        backgroundColor: backgroundColor || ['#3467eb', '#ccc', '#252525', '#ccc'],
         borderRadius: 4,
         barThickness: 100,
       },
     ],
   };
+
 
   const options = {
     responsive: true,
