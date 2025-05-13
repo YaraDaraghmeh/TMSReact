@@ -66,7 +66,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
               tab.id === 'homeBtn' ? '/dashboard' :
               tab.id === 'projectsBtn' ? '/project' :
               tab.id === 'tasksBtn' ? '/Task' :
-              '/chat'
+              '/Chat'
             }
             onClick={() => setActiveTab(tab.id)}
             className={classNames(
