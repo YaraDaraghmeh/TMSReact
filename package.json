@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
+    "apollo-server-express": "^3.13.0",
     "chart.js": "^4.4.9",
     "classnames": "^2.5.1",
+    "emoji-toolkit": "^9.0.1",
     "graphql": "^16.11.0",
     "graphql-request": "^7.1.2",
     "jwt-decode": "^4.0.0",
