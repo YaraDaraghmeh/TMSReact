@@ -1,16 +1,57 @@
 import React, { useState } from 'react';
+import { useQuery, useMutation, gql } from '@apollo/client';
 import ProjectCard from '../Components/ProjectCard/ProjectCard';
-import { projectsData } from '../Data/projectsData';
 import AddProjectModal from '../Components/AddingNewProject/AddProjectModal';
 import ProjectDetailPopup from '../Components/ProjectCard/ProjectDetailPopup';
 
-const ProjectsOverview = () => {
+const GET_PROJECTS = gql`
+  query GetProjects {
+    allProjects {
+      id
+      title
+      description
+      progress
+      status
+      startDate
+      endDate
+      tasks {
+        id
+        name
+        status
+        dueDate
+      }
+    }
+  }
+`;
+
+ const CREATE_PROJECT = gql`
+  mutation CreateProject($input: ProjectInput!) {
+    createProject(input: $input) {
+      id
+      title
+      description
+      progress
+      status
+      startDate
+      endDate
+      students {
+        id
+        name
+      }
+    }
+  }
+`;
+
+const ProjectsOverview: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
   const [showModal, setShowModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
 
-  const handleProjectClick = (project) => {
+  const { loading, error, data, refetch } = useQuery(GET_PROJECTS);
+  const [createProject] = useMutation(CREATE_PROJECT);
+
+  const handleProjectClick = (project: any) => {
     setSelectedProject(project);
   };
 
@@ -26,18 +67,38 @@ const ProjectsOverview = () => {
     setShowModal(false);
   };
 
-  const handleAddProject = (newProject) => {
-    console.log('New project added:', newProject);
-    handleCloseModal();
+  const handleAddProject = async (newProject: any) => {
+    try {
+      await createProject({
+        variables: {
+          input: {
+            title: newProject.title,
+            description: newProject.description,
+            category: newProject.category,
+            progress: newProject.progress,
+            status: newProject.status,
+            startDate: newProject.startDate,
+            endDate: newProject.endDate,
+            students: newProject.students, // array of student IDs
+          }
+        }
+      });
+      handleCloseModal();
+      refetch();
+    } catch (err) {
+      console.error('Error adding project:', err);
+    }
   };
 
-  const getProjectStatus = (project) => {
+  const getProjectStatus = (project: any) => {
     if (project.progress === 100) return 'Completed';
     if (project.progress > 0) return 'In Progress';
     return 'Not Started';
   };
 
-  const filteredProjects = projectsData.filter((project) => {
+  const projects = data?.allProjects || [];
+
+  const filteredProjects = projects.filter((project: any) => {
     const matchesSearch =
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -49,28 +110,31 @@ const ProjectsOverview = () => {
     return matchesSearch && matchesStatus;
   });
 
+  if (loading) return <div className="text-white p-5">Loading...</div>;
+  if (error) return <div className="text-red-500 p-5">Error: {error.message}</div>;
+
   return (
     <div className="bg-[#212121] text-white p-5 min-h-screen font-sans">
       <h1 className="text-[#0099ff] text-2xl mb-5">Projects Overview</h1>
 
-      <div className="flex flex-col md:flex-row gap-[15px] mb-5">
+      <div className="flex flex-col md:flex-row gap-4 mb-5">
         <button
-          className="bg-[#0099ff] text-white border-none py-[10px] px-[15px] rounded-[5px] cursor-pointer font-bold"
           onClick={handleAddProjectClick}
+          className="bg-[#0099ff] py-2 px-4 rounded font-bold"
         >
           Add New Project
         </button>
 
         <input
           type="text"
-          placeholder="Search projects by title or description..."
-          className="flex-1 p-[10px] rounded-[5px] border-none text-black"
+          placeholder="Search projects..."
+          className="flex-1 p-2 rounded text-black"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
         <select
-          className="p-[10px] rounded-[5px] border-none text-black"
+          className="p-2 rounded text-black"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -81,17 +145,17 @@ const ProjectsOverview = () => {
         </select>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-[20px]">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-5">
         {filteredProjects.length > 0 ? (
-          filteredProjects.map((project) => (
+          filteredProjects.map((project: any) => (
             <ProjectCard
               key={project.id}
               project={project}
-              onClick={handleProjectClick}
+              onClick={() => handleProjectClick(project)}
             />
           ))
         ) : (
-          <p className="text-[#ccc] italic">No projects match your filters.</p>
+          <p className="italic text-[#ccc]">No projects match your filters.</p>
         )}
       </div>
 

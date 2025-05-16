@@ -7,7 +7,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
     category: '',
     status: '',
     startDate: '',
-    dueDate: '',
+    endDate: '',
     students: ''
   });
 
@@ -18,22 +18,26 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Split students by line, expecting IDs (or names if you want, but IDs are best for backend)
     const studentsArray = project.students
       .split('\n')
       .map((s) => s.trim())
       .filter(Boolean);
 
     const newProject = {
-      ...project,
-      id: Date.now(),
+      title: project.title,
+      description: project.description,
+      category: project.category,
+      status: project.status,
+      startDate: project.startDate,
+      endDate: project.endDate,
       students: studentsArray,
       progress:
         project.status === 'Completed'
           ? 100
           : project.status === 'In Progress'
           ? 50
-          : 0,
-      endDate: project.dueDate
+          : 0
     };
 
     onAdd(newProject);
@@ -43,7 +47,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
       category: '',
       status: '',
       startDate: '',
-      dueDate: '',
+      endDate: '',
       students: ''
     });
   };
@@ -135,30 +139,30 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
           </div>
 
           <div className="mb-[20px]">
-            <label className="block mb-[8px] text-[1.1rem] font-bold">Due Date</label>
+            <label className="block mb-[8px] text-[1.1rem] font-bold">End Date</label>
             <input
               type="date"
-              name="dueDate"
+              name="endDate"
               className="w-full p-[12px] pr-[36px] bg-[#333] border border-[#666] rounded-[5px] text-white text-[1rem]"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E")`,
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'right 12px center'
               }}
-              value={project.dueDate}
+              value={project.endDate}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="mb-[20px] max-h-[150px] overflow-y-auto">
-            <label className="block mb-[8px] text-[1.1rem] font-bold">Students (one per line)</label>
+            <label className="block mb-[8px] text-[1.1rem] font-bold">Students (IDs, one per line)</label>
             <textarea
               name="students"
               className="w-full p-[12px] bg-[#333] border border-[#666] rounded-[5px] text-white text-[1rem] min-h-[120px] resize-y"
               value={project.students}
               onChange={handleChange}
-              placeholder="e.g. John Doe&#10;Jane Smith"
+              placeholder="e.g. 663e2e9b8e2f4b2f8c8e4c1a&#10;663e2e9b8e2f4b2f8c8e4c1b"
             />
           </div>
 

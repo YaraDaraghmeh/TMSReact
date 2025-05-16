@@ -10,29 +10,50 @@ const ProjectCard = ({ project, onClick }) => {
         {project.title}
       </h2>
 
+      {/* Description */}
       <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
-        <span className="font-semibold">Description:</span> {project.description}
+        <span className="font-semibold">Description:</span>{' '}
+        {project.description || 'No description provided.'}
       </div>
 
+      {/* Status */}
       <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
-        <span className="font-semibold">Students:</span> {project.students.join(', ')}
+        <span className="font-semibold">Status:</span>{' '}
+        {project.status || 'N/A'}
       </div>
 
+      {/* Category */}
       <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
-        <span className="font-semibold">Category:</span> {project.category}
+        <span className="font-semibold">Category:</span>{' '}
+        {project.category || 'N/A'}
       </div>
 
+      {/* Students */}
+      <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
+        <span className="font-semibold">Students:</span>{' '}
+        {Array.isArray(project.students) && project.students.length > 0
+          ? project.students.map((s) => s.name).join(', ')
+          : 'No students assigned'}
+      </div>
+
+      {/* Dates */}
+      <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
+        <span className="font-semibold">Start:</span>{' '}
+        {project.startDate || 'N/A'}{' '}
+        <span className="font-semibold ml-2">End:</span>{' '}
+        {project.endDate || 'N/A'}
+      </div>
+
+      {/* Progress */}
       <div className="mt-4">
         <div className="w-full h-[10px] bg-[#333] rounded-full overflow-hidden">
           <div
             className="h-full bg-[#3b82f6] rounded-full"
-            style={{ width: `${project.progress}%` }}
+            style={{ width: `${project.progress || 0}%` }}
           ></div>
         </div>
-
         <div className="flex justify-between mt-1 text-[#888] text-[0.8rem]">
-          <span>{project.startDate}</span>
-          <span>{project.endDate}</span>
+          <span>{project.progress || 0}% Complete</span>
         </div>
       </div>
     </div>

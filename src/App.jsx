@@ -4,7 +4,7 @@ import { ApolloProvider } from '@apollo/client';
 import client from './services/apolloClient';
 import Dashboard from './pages/Dashboard';
 import MainLayout from './Components/MainLayout';
-import ProjectOverviewPage from './pages/ProjectsOverview';
+import ProjectsOverviewPage from './pages/ProjectsOverview';
 import Tasks from './pages/Tasks'
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/project" element={<ProjectOverviewPage />} />
+            <Route path="/project" element={<ProjectsOverviewPage />} />
             <Route path="/Task" element={<Tasks/>} />
           </Route>
         </Routes>

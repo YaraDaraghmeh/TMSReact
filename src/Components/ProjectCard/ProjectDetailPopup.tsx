@@ -24,7 +24,8 @@ const ProjectDetailPopup = ({ project, onClose }) => {
             <span className="font-bold">Category:</span> {project.category}
           </div>
           <div className="mb-2 text-sm leading-[1.5]">
-            <span className="font-bold">Students:</span> {project.students.join(', ')}
+<span className="font-bold">Students:</span>{' '}
+{Array.isArray(project.students) ? project.students.join(', ') : 'N/A'}
           </div>
           <div className="mb-2 text-sm leading-[1.5]">
             <span className="font-bold">Start Date:</span> {project.startDate}
