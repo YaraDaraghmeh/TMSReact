@@ -3,6 +3,28 @@ import React from 'react';
 const ProjectDetailPopup = ({ project, onClose }) => {
   if (!project) return null;
 
+  // Format date function to convert timestamps to readable dates
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+    
+    // Check if the timestamp is a number (unix timestamp)
+    if (!isNaN(Number(timestamp))) {
+      return new Date(Number(timestamp)).toLocaleDateString();
+    }
+    
+    return timestamp;
+  };
+  
+  // Function to safely extract student name from potential objects
+  const formatStudent = (student) => {
+    if (!student) return 'Unassigned';
+    if (typeof student === 'string') return student;
+    if (typeof student === 'object') {
+      return student.name || student.username || 'Unknown Student';
+    }
+    return 'Unknown Format';
+  };
+
   return (
     <div className="fixed top-0 right-0 bottom-0 w-[400px] bg-[#181818] z-[1000] shadow-[5px_0_15px_rgba(0,0,0,0.3)] overflow-y-auto text-white p-0 border-r border-[#333]">
       <div className="p-5">
@@ -24,13 +46,16 @@ const ProjectDetailPopup = ({ project, onClose }) => {
             <span className="font-bold">Category:</span> {project.category}
           </div>
           <div className="mb-2 text-sm leading-[1.5]">
-            <span className="font-bold">Students:</span> {project.students.join(', ')}
+            <span className="font-bold">Students:</span>{' '}
+            {Array.isArray(project.students) 
+              ? project.students.map(student => formatStudent(student)).join(', ') 
+              : 'N/A'}
           </div>
           <div className="mb-2 text-sm leading-[1.5]">
-            <span className="font-bold">Start Date:</span> {project.startDate}
+            <span className="font-bold">Start Date:</span> {formatDate(project.startDate)}
           </div>
           <div className="mb-2 text-sm leading-[1.5]">
-            <span className="font-bold">End Date:</span> {project.endDate}
+            <span className="font-bold">End Date:</span> {formatDate(project.endDate)}
           </div>
         </div>
 
@@ -55,7 +80,7 @@ const ProjectDetailPopup = ({ project, onClose }) => {
                   </div>
                   <div className="mb-2 text-sm">
                     <span className="font-bold">Assigned Student:</span>{' '}
-                    {task.assignedStudent}
+                    {formatStudent(task.assignedStudent)}
                   </div>
                   <div className="mb-2 text-sm">
                     <span className="font-bold">Status:</span>{' '}

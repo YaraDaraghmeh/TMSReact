@@ -1,7 +1,7 @@
-// src/pages/Tasks.tsx
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
+import TaskForm from '../Components/TaskForm';
 
 const GET_TASKS = gql`
   query GetTasks {
@@ -29,6 +29,25 @@ const GET_TASKS = gql`
   }
 `;
 
+const GET_STUDENT_TASKS = gql`
+ query GetStudentTasks($studentId: ID!) {
+  studentTasks(studentId: $studentId) {
+    id
+    project {
+      title
+    }
+    name
+    description
+    status
+    dueDate
+    assignedTo {
+      id
+      name
+    }
+  }
+}
+`;
+
 const CREATE_TASK = gql`
   mutation CreateTask($input: TaskInput!) {
     createTask(input: $input) {
@@ -39,7 +58,39 @@ const CREATE_TASK = gql`
   }
 `;
 
+const UPDATE_TASK_STATUS = gql`
+  mutation UpdateTaskStatus($taskId: ID!, $status: String!) {
+    updateTaskStatus(taskId: $taskId, status: $status) {
+      id
+      status
+    }
+  }
+`;
+
 const Tasks: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+  const [userLoaded, setUserLoaded] = useState(false);
+  const [username, setUsername] = useState("");
+  const [isRefetching, setIsRefetching] = useState(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setUsername(parsedUser.name);
+      setUserLoaded(true);
+      console.log("User data:", {
+        id: parsedUser.id,
+        studentId: parsedUser.studentId,
+        role: parsedUser.role
+      });
+    }
+  }, []);
+
+  const isAdmin = user?.role === "Administrator";
+  const isStudent = user?.role === "Student";
+  const [updateTaskStatus] = useMutation(UPDATE_TASK_STATUS);
   const [showForm, setShowForm] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [sortBy, setSortBy] = useState('Task Status');
@@ -51,17 +102,51 @@ const Tasks: React.FC = () => {
     status: '',
     dueDate: ''
   });
-  
-  const { loading, error, data, refetch } = useQuery(GET_TASKS);
+
+  const {
+    loading: adminLoading,
+    error: adminError,
+    data: adminData,
+    refetch: refetchAdminTasks
+  } = useQuery(GET_TASKS, {
+    skip: !userLoaded || !isAdmin
+  });
+
+  const {
+    loading: studentLoading,
+    error: studentError,
+    data: studentData,
+    refetch: refetchStudentTasks
+  } = useQuery(GET_STUDENT_TASKS, {
+    skip: !userLoaded || !isStudent || !user?.studentId,
+    variables: { studentId: user?.studentId }
+  });
+
   const [createTask] = useMutation(CREATE_TASK);
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
+  const refetchTasks = async () => {
+    setIsRefetching(true);
+    try {
+      if (isAdmin) {
+        await refetchAdminTasks();
+      } else if (isStudent) {
+        await refetchStudentTasks();
+      }
+    } catch (err) {
+      console.error('Error refetching data:', err);
+    } finally {
+      setIsRefetching(false);
     }
-  }, [navigate]);
+  };
+
+  console.log("Tasks data:", {
+    adminData,
+    studentData,
+    user,
+    isStudent
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -91,7 +176,7 @@ const Tasks: React.FC = () => {
         status: '',
         dueDate: ''
       });
-      refetch();
+      await refetchTasks();
     } catch (err) {
       console.error('Error creating task:', err);
     }
@@ -99,12 +184,12 @@ const Tasks: React.FC = () => {
 
   const getStatusClass = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'completed': return 'text-blue-500';
-      case 'in progress': return 'text-green-500';
-      case 'pending': return 'text-yellow-500';
-      case 'on hold': return 'text-orange-500';
-      case 'cancelled': return 'text-red-500';
-      default: return 'text-gray-500';
+      case 'completed': return 'text-blue-600 bg-blue-100';
+      case 'in progress': return 'text-green-600 bg-green-100';
+      case 'pending': return 'text-yellow-600 bg-yellow-100';
+      case 'on hold': return 'text-orange-600 bg-orange-100';
+      case 'cancelled': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -129,65 +214,106 @@ const Tasks: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (error) return <div className="flex justify-center items-center h-screen">Error: {error.message}</div>;
+  if (!userLoaded) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (adminError || studentError) return <div className="flex justify-center items-center h-screen">Error: {adminError?.message || studentError?.message}</div>;
 
-  const sortedTasks = data?.tasks ? sortTasks(data.tasks) : [];
+  const tasks = isStudent ? studentData?.studentTasks || [] : adminData?.tasks || [];
+  const sortedTasks = sortTasks(tasks);
+
+  if (isStudent && sortedTasks.length === 0) {
+    return (
+      <div className="p-6 bg-[#1e1e1e] text-white min-h-screen">
+        <h1 className="text-3xl font-bold text-[#3467eb] mb-8">My Tasks</h1>
+        <div className="bg-[#252525] p-8 rounded-lg text-center">
+          <p className="text-xl">No tasks assigned to you yet</p>
+          <p className="text-gray-400 mt-2">Please check back later or contact your administrator</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-950 min-h-screen text-white">
+    <div className="p-6 bg-[#1e1e1e] text-white min-h-screen">
       <div className="mb-8 flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Task Management</h1>
+        <h1 className="text-3xl font-bold text-[#3467eb]">
+          {isAdmin ? 'Task Management' : 'My Tasks'}
+        </h1>
+
         <div className="flex gap-4">
           <div className="relative">
             <button
               onClick={() => setShowSortMenu(!showSortMenu)}
               className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2"
+              disabled={isRefetching}
             >
               <span>Sort By: {sortBy}</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            
+
             {showSortMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg z-10">
                 <div className="py-1">
-                  {['Task Status', 'Project', 'Task Name', 'Assigned Student', 'Due Date'].map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => {
-                        setSortBy(option);
-                        setShowSortMenu(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${sortBy === option ? 'bg-gray-700 text-blue-400' : 'text-white hover:bg-gray-700'}`}
-                    >
-                      {option}
-                    </button>
-                  ))}
+                  {isAdmin ? (
+                    ['Task Status', 'Project', 'Task Name', 'Assigned Student', 'Due Date'].map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => {
+                          setSortBy(option);
+                          setShowSortMenu(false);
+                        }}
+                        className={`block w-full text-left px-4 py-2 text-sm ${sortBy === option ? 'bg-gray-700 text-blue-400' : 'text-white hover:bg-gray-700'}`}
+                      >
+                        {option}
+                      </button>
+                    ))
+                  ) : (
+                    ['Task Status', 'Task Name', 'Due Date'].map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => {
+                          setSortBy(option);
+                          setShowSortMenu(false);
+                        }}
+                        className={`block w-full text-left px-4 py-2 text-sm ${sortBy === option ? 'bg-gray-700 text-blue-400' : 'text-white hover:bg-gray-700'}`}
+                      >
+                        {option}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             )}
           </div>
-          
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-          >
-            Create New Task
-          </button>
+
+          {isAdmin && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              disabled={isRefetching}
+            >
+              {isRefetching ? 'Loading...' : 'Create New Task'}
+            </button>
+          )}
         </div>
       </div>
 
+      {isRefetching && (
+        <div className="mb-4 p-2 bg-blue-900 text-blue-200 rounded text-center">
+          Updating tasks...
+        </div>
+      )}
+
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-gray-900 rounded-lg overflow-hidden">
+        <table className="min-w-full bg-[#252525] rounded-lg overflow-hidden">
           <thead className="bg-gray-800">
             <tr>
-              <th className="px-6 py-3 text-left">Task ID</th>
+              {isAdmin && <th className="px-6 py-3 text-left">Task ID</th>}
               <th className="px-6 py-3 text-left">Project</th>
               <th className="px-6 py-3 text-left">Task Name</th>
               <th className="px-6 py-3 text-left">Description</th>
-              <th className="px-6 py-3 text-left">Assigned Student</th>
+              {isAdmin && <th className="px-6 py-3 text-left">Assigned Student</th>}
               <th className="px-6 py-3 text-left">Status</th>
               <th className="px-6 py-3 text-left">Due Date</th>
             </tr>
@@ -195,12 +321,78 @@ const Tasks: React.FC = () => {
           <tbody className="divide-y divide-gray-700">
             {sortedTasks.map((task: any) => (
               <tr key={task.id} className="hover:bg-gray-800">
-                <td className="px-6 py-4">{task.id.slice(-6)}</td>
+                {isAdmin && <td className="px-6 py-4">{task.id.slice(-6)}</td>}
                 <td className="px-6 py-4">{task.project?.title}</td>
                 <td className="px-6 py-4">{task.name}</td>
                 <td className="px-6 py-4">{task.description}</td>
-                <td className="px-6 py-4">{task.assignedTo?.name}</td>
-                <td className={`px-6 py-4 ${getStatusClass(task.status)}`}>{task.status}</td>
+
+                {isAdmin && <td className="px-6 py-4">{task.assignedTo?.name}</td>}
+                <td className="px-6 py-4">
+                  {(isAdmin || task.assignedTo?.id === user?.studentId) ? (
+                    <>
+                      {isAdmin ? (
+                        <select
+                          value={task.status}
+                          onChange={async (e) => {
+                            try {
+                              await updateTaskStatus({
+                                variables: {
+                                  taskId: task.id,
+                                  status: e.target.value
+                                }
+                              });
+                              await refetchTasks();
+                            } catch (err) {
+                              console.error("Failed to update status", err);
+                            }
+                          }}
+                          className={`bg-transparent border border-gray-600 rounded px-2 py-1 font-semibold ${getStatusClass(task.status).split(' ')[0]}`}
+                        >
+                          <option value={task.status} disabled className="text-black">
+                            {task.status}
+                          </option>
+                          <option value="Cancelled" className="text-black">Cancelled</option>
+                          <option value="On Hold" className="text-black">On Hold</option>
+                        </select>
+                      ) : (
+                        !['Cancelled', 'On Hold'].includes(task.status) ? (
+                          <select
+                            value={task.status}
+                            onChange={async (e) => {
+                              try {
+                                await updateTaskStatus({
+                                  variables: {
+                                    taskId: task.id,
+                                    status: e.target.value
+                                  }
+                                });
+                                await refetchTasks();
+                              } catch (err) {
+                                console.error("Failed to update status", err);
+                              }
+                            }}
+                            className={`bg-transparent border border-gray-600 rounded px-2 py-1 font-semibold ${getStatusClass(task.status).split(' ')[0]}`}
+                          >
+                            {['Pending', 'In Progress', 'Completed'].map((option) => (
+                              <option key={option} value={option} className="text-black">
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className={`inline-block px-2 py-1 rounded font-semibold ${getStatusClass(task.status)}`}>
+                            {task.status}
+                          </span>
+                        )
+                      )}
+                    </>
+                  ) : (
+                    <span className={`inline-block px-2 py-1 rounded font-semibold ${getStatusClass(task.status)}`}>
+                      {task.status}
+                    </span>
+                  )}
+                </td>
+
                 <td className="px-6 py-4">
                   {task.dueDate && !isNaN(Number(task.dueDate))
                     ? new Date(Number(task.dueDate)).toLocaleDateString()
@@ -212,118 +404,16 @@ const Tasks: React.FC = () => {
         </table>
       </div>
 
-      {/* Task Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-blue-400">Create New Task</h2>
-              <button 
-                onClick={() => setShowForm(false)}
-                className="text-gray-400 hover:text-white text-2xl"
-              >
-                &times;
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block mb-2">Project Title:</label>
-                <select
-                  name="projectId"
-                  value={formData.projectId}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-                  required
-                >
-                  <option value="" disabled>Select a Project</option>
-                  {data?.projects?.map((project: any) => (
-                    <option key={project.id} value={project.id}>
-                      {project.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block mb-2">Task Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2">Description:</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600 min-h-[100px]"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2">Assigned Student:</label>
-                <select
-                  name="assignedTo"
-                  value={formData.assignedTo}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-                  required
-                >
-                  <option value="" disabled>Select a Student</option>
-                  {data?.students?.map((student: any) => (
-                    <option key={student.id} value={student.id}>
-                      {student.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block mb-2">Status:</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-                  required
-                >
-                  <option value="" disabled>Select Status</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Pending">Pending</option>
-                  <option value="On Hold">On Hold</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block mb-2">Due Date:</label>
-                <input
-                  type="date"
-                  name="dueDate"
-                  value={formData.dueDate}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
-              >
-                Add Task
-              </button>
-            </form>
-          </div>
-        </div>
+      {isAdmin && showForm && (
+        <TaskForm
+          formData={formData}
+          onChange={handleInputChange}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleSubmit}
+          projects={adminData?.projects || []}
+          students={adminData?.students || []}
+          isSubmitting={isRefetching}
+        />
       )}
     </div>
   );

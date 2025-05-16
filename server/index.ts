@@ -11,7 +11,11 @@ import http from 'http';
 import loginSchema from './GraphQl/LoginAPI.js';
 import taskSchema from './GraphQl/TaskAPI.js';
 import homeSchema from './GraphQl/HomeAPI.js';
+<<<<<<< HEAD
+import ProjectSchema from './GraphQl/ProjectAPI.js';
+=======
 import userSchema from './GraphQl/UserAPI.js';
+>>>>>>> 73981a083bb513e701a0abdc9c25ee4559660b00
 
 dotenv.config();
 
@@ -39,7 +43,11 @@ app.use(authMiddleware);
 
 // Merge GraphQL Schemas
 const mergedSchema = mergeSchemas({
+<<<<<<< HEAD
+  schemas: [loginSchema, taskSchema,homeSchema,ProjectSchema]
+=======
   schemas: [loginSchema, taskSchema, homeSchema, userSchema],
+>>>>>>> 73981a083bb513e701a0abdc9c25ee4559660b00
 });
 
 app.use('/graphql', graphqlHTTP((req) => ({

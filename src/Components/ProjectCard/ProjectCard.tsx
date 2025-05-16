@@ -1,5 +1,19 @@
 import React from 'react';
 
+const formatDate = (timestamp) => {
+  if (!timestamp) return 'N/A';
+  // Check if the timestamp is a number (unix timestamp)
+  if (!isNaN(Number(timestamp))) {
+    return new Date(Number(timestamp)).toLocaleDateString();
+  }
+  // Try to parse ISO string
+  const date = new Date(timestamp);
+  if (!isNaN(date.getTime())) {
+    return date.toLocaleDateString();
+  }
+  return timestamp;
+};
+
 const ProjectCard = ({ project, onClick }) => {
   return (
     <div
@@ -10,29 +24,50 @@ const ProjectCard = ({ project, onClick }) => {
         {project.title}
       </h2>
 
+      {/* Description */}
       <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
-        <span className="font-semibold">Description:</span> {project.description}
+        <span className="font-semibold">Description:</span>{' '}
+        {project.description || 'No description provided.'}
       </div>
 
+      {/* Status */}
       <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
-        <span className="font-semibold">Students:</span> {project.students.join(', ')}
+        <span className="font-semibold">Status:</span>{' '}
+        {project.status || 'N/A'}
       </div>
 
+      {/* Category */}
       <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
-        <span className="font-semibold">Category:</span> {project.category}
+        <span className="font-semibold">Category:</span>{' '}
+        {project.category || 'N/A'}
       </div>
 
+      {/* Students */}
+      <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
+        <span className="font-semibold">Students:</span>{' '}
+        {Array.isArray(project.students) && project.students.length > 0
+          ? project.students.map((s) => s.name).join(', ')
+          : 'No students assigned'}
+      </div>
+
+      {/* Dates */}
+      <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
+        <span className="font-semibold">Start:</span>{' '}
+        {formatDate(project.startDate)}{' '}
+        <span className="font-semibold ml-2">End:</span>{' '}
+        {formatDate(project.endDate)}
+      </div>
+
+      {/* Progress */}
       <div className="mt-4">
         <div className="w-full h-[10px] bg-[#333] rounded-full overflow-hidden">
           <div
             className="h-full bg-[#3b82f6] rounded-full"
-            style={{ width: `${project.progress}%` }}
+            style={{ width: `${project.progress || 0}%` }}
           ></div>
         </div>
-
         <div className="flex justify-between mt-1 text-[#888] text-[0.8rem]">
-          <span>{project.startDate}</span>
-          <span>{project.endDate}</span>
+          <span>{project.progress || 0}% Complete</span>
         </div>
       </div>
     </div>

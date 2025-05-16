@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
+<<<<<<< HEAD
+    "apollo-server-micro": "^3.13.0",
+=======
     "apollo-server-express": "^3.13.0",
+>>>>>>> 73981a083bb513e701a0abdc9c25ee4559660b00
     "chart.js": "^4.4.9",
     "classnames": "^2.5.1",
     "emoji-toolkit": "^9.0.1",

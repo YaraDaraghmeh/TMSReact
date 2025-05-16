@@ -1,11 +1,18 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose from 'mongoose';
 
-export interface IStudent extends Document {
-    name: string;
-}
-
-const StudentSchema = new Schema<IStudent>({
-    name: { type: String, required: true }
+const StudentSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-export default mongoose.model<IStudent>('Student', StudentSchema);
+export default mongoose.model('Student', StudentSchema);
