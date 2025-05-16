@@ -21,6 +21,7 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// JWT Authentication Middleware
 const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return next();
@@ -36,6 +37,7 @@ const authMiddleware = (req: express.Request, res: express.Response, next: expre
 };
 app.use(authMiddleware);
 
+// Merge GraphQL Schemas
 const mergedSchema = mergeSchemas({
   schemas: [loginSchema, taskSchema, homeSchema, userSchema],
 });
@@ -52,10 +54,11 @@ app.get('/', (req, res) => {
 
 const server = http.createServer(app);
 
+// WebSocket Setup
 interface ConnectedUser {
   id: string;
   connection: WebSocketConnection;
-  userId?: string; 
+  userId?: string;
 }
 
 const connectedUsers: { [id: string]: ConnectedUser } = {};
@@ -66,48 +69,111 @@ const wsServer = new WebSocketServer({
 
 const generateID = () => "id" + Math.random().toString(16).slice(2);
 
+// WebSocket Logic
 wsServer.on("request", function (request: WebSocketRequest) {
   const id = generateID();
-  console.log("Connection request from " + request.origin + ".");
-
   const connection = request.accept(null, request.origin);
-
   connectedUsers[id] = { id, connection };
 
-  console.log(`Connection established: ${id} | Total: ${Object.keys(connectedUsers).length}`);
+  console.log(`✅ WebSocket connected: ${id}`);
+
+  // Broadcast online users to all
+  function broadcastOnlineUsers() {
+    const onlineUserIds = Object.values(connectedUsers)
+      .map((u) => u.userId)
+      .filter(Boolean);
+
+    const payload = JSON.stringify({
+      type: 'onlineUsers',
+      users: onlineUserIds,
+    });
+
+    Object.values(connectedUsers).forEach(({ connection }) => {
+      connection.sendUTF(payload);
+    });
+  }
 
   connection.on("message", function (message) {
-    if (message.type === 'utf8') {
-      try {
-        const data = JSON.parse(message.utf8Data || '{}');
+  if (message.type === 'utf8') {
+    try {
+      const data = JSON.parse(message.utf8Data || '{}');
 
-        if (data.type === "message") {
-          const fromUserId = data.fromUserId;
-          const targetUserId = data.targetUserId; 
-          Object.values(connectedUsers).forEach(({ connection, userId }) => {
-            
-            if (!targetUserId || targetUserId === userId) {
-              connection.sendUTF(JSON.stringify({
-                userName: data.userName,
-                message: data.message,
-                fromUserId,
-                targetUserId
-              }));
-            }
-          });
-        }
-      } catch (err) {
-        console.error("Failed to process message:", err);
+      // ✅ تسجيل userId عند الانضمام
+      if (data.type === 'join' && data.userId) {
+        connectedUsers[id].userId = data.userId;
+        broadcastOnlineUsers();
+        return;
       }
+
+      // ✅ احتياطي: تسجيل userId عند إرسال أول رسالة
+      if (data.fromUserId && !connectedUsers[id].userId) {
+        connectedUsers[id].userId = data.fromUserId;
+        broadcastOnlineUsers();
+      }
+
+      // ✅ إرسال رسالة مع الوقت
+      if (data.type === "message") {
+        const { fromUserId, targetUserId, userName, message: msg, id: messageId } = data;
+
+        const payload = JSON.stringify({
+          type: "message",
+          id: messageId,
+          userName,
+          message: msg,
+          fromUserId,
+          targetUserId,
+          time: new Date().toISOString(), // ⏰ أضف الوقت هنا
+        });
+
+        Object.values(connectedUsers).forEach(({ connection, userId }) => {
+          if (!targetUserId || targetUserId === userId || fromUserId === userId) {
+            connection.sendUTF(payload);
+          }
+        });
+      }
+
+      // ✅ مؤشر الكتابة
+      else if (data.type === "typing") {
+        const { fromUserId, targetUserId, userName } = data;
+
+        Object.values(connectedUsers).forEach(({ connection, userId }) => {
+          if (userId !== fromUserId && (!targetUserId || userId === targetUserId)) {
+            connection.sendUTF(JSON.stringify({
+              type: "typing",
+              userName,
+              fromUserId,
+              targetUserId,
+            }));
+          }
+        });
+      }
+
+      // ✅ إشعار القراءة
+      else if (data.type === 'read') {
+        const receiver = Object.values(connectedUsers).find(u => u.userId === data.toUserId);
+        if (receiver) {
+          receiver.connection.sendUTF(JSON.stringify({
+            type: 'read',
+            messageId: data.messageId,
+          }));
+        }
+      }
+
+    } catch (err) {
+      console.error("❌ Failed to process message:", err);
     }
-  });
+  }
+});
+
 
   connection.on("close", () => {
-    console.log("Connection closed: ", id);
+    console.log("🔌 WebSocket closed:", id);
     delete connectedUsers[id];
+    broadcastOnlineUsers();
   });
 });
 
+// MongoDB + Start Server
 mongoose.connect(process.env.MONGO_URI as string)
   .then(() => {
     console.log('✅ Connected to MongoDB');
