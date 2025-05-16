@@ -12,15 +12,12 @@ import loginSchema from './GraphQl/LoginAPI.js';
 import taskSchema from './GraphQl/TaskAPI.js';
 import homeSchema from './GraphQl/HomeAPI.js';
 import ProjectSchema from './GraphQl/ProjectAPI.js';
-
-import ProjectSchema from './GraphQl/ProjectAPI.js';
-
 import userSchema from './GraphQl/UserAPI.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001;
 
 app.use(cors());
 app.use(express.json());
