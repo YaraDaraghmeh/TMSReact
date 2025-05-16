@@ -34,6 +34,23 @@ const TaskType = new GraphQLObjectType({
   })
 });
 
+// StudentType
+const StudentType = new GraphQLObjectType({
+  name: 'Student',
+  fields: () => ({
+    id: { type: GraphQLID },
+    name: { type: GraphQLString },
+    email: { type: GraphQLString },
+    projects: {
+      type: new GraphQLList(ProjectType),
+      resolve: async (parent) => {
+        // Find all projects that have this student ID in their students array
+        return Project.find({ students: parent._id });
+      }
+    }
+  })
+});
+
 // ProjectType
 const ProjectType = new GraphQLObjectType({
   name: 'Project',
@@ -92,6 +109,26 @@ const RootQuery = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve: (_, { id }) => Project.findById(id)
+    },
+    allStudents: {
+      type: new GraphQLList(StudentType),
+      resolve: () => Student.find()
+    },
+    studentById: {
+      type: StudentType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: (_, { id }) => Student.findById(id)
+    },
+    projectsByStudentId: {
+      type: new GraphQLList(ProjectType),
+      args: {
+        studentId: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: (_, { studentId }) => {
+        return Project.find({ students: studentId });
+      }
     }
   }
 });
@@ -108,6 +145,17 @@ const Mutation = new GraphQLObjectType({
       resolve: async (_, { input }) => {
         const newProject = new Project(input);
         return await newProject.save();
+      }
+    },
+    createStudent: {
+      type: StudentType,
+      args: {
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        email: { type: GraphQLString }
+      },
+      resolve: async (_, { name, email }) => {
+        const newStudent = new Student({ name, email });
+        return await newStudent.save();
       }
     }
   }

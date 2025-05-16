@@ -1,5 +1,19 @@
 import React from 'react';
 
+const formatDate = (timestamp) => {
+  if (!timestamp) return 'N/A';
+  // Check if the timestamp is a number (unix timestamp)
+  if (!isNaN(Number(timestamp))) {
+    return new Date(Number(timestamp)).toLocaleDateString();
+  }
+  // Try to parse ISO string
+  const date = new Date(timestamp);
+  if (!isNaN(date.getTime())) {
+    return date.toLocaleDateString();
+  }
+  return timestamp;
+};
+
 const ProjectCard = ({ project, onClick }) => {
   return (
     <div
@@ -39,9 +53,9 @@ const ProjectCard = ({ project, onClick }) => {
       {/* Dates */}
       <div className="text-[#e0e0e0] mb-2 text-[0.9rem]">
         <span className="font-semibold">Start:</span>{' '}
-        {project.startDate || 'N/A'}{' '}
+        {formatDate(project.startDate)}{' '}
         <span className="font-semibold ml-2">End:</span>{' '}
-        {project.endDate || 'N/A'}
+        {formatDate(project.endDate)}
       </div>
 
       {/* Progress */}

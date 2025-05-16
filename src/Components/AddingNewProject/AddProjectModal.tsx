@@ -1,28 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery, gql } from '@apollo/client';
 
-const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
-  const [project, setProject] = useState({
+// GraphQL query to fetch all students
+const GET_ALL_STUDENTS = gql`
+  query GetAllStudents {
+    allStudents {
+      id
+      name
+    }
+  }
+`;
+
+type Student = {
+  id: string;
+  name: string;
+};
+
+type ProjectState = {
+  title: string;
+  description: string;
+  category: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  selectedStudents: Student[];
+};
+
+type AddProjectModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onAdd: (project: any) => void;
+};
+
+const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClose, onAdd }) => {
+  const [project, setProject] = useState<ProjectState>({
     title: '',
     description: '',
     category: '',
     status: '',
     startDate: '',
     endDate: '',
-    students: ''
+    selectedStudents: []
   });
+
+  // Fetch students using GraphQL
+  const { loading, error, data } = useQuery(GET_ALL_STUDENTS);
+  const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
+
+  useEffect(() => {
+    if (data && data.allStudents) {
+      setAvailableStudents(data.allStudents);
+    }
+  }, [data]);
 
   const handleChange = (e) => {
     setProject({ ...project, [e.target.name]: e.target.value });
   };
 
+  const handleStudentSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => ({
+      id: option.value,
+      name: option.label
+    }));
+    setProject({ ...project, selectedStudents: selectedOptions });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Split students by line, expecting IDs (or names if you want, but IDs are best for backend)
-    const studentsArray = project.students
-      .split('\n')
-      .map((s) => s.trim())
-      .filter(Boolean);
 
     const newProject = {
       title: project.title,
@@ -31,7 +75,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
       status: project.status,
       startDate: project.startDate,
       endDate: project.endDate,
-      students: studentsArray,
+      students: project.selectedStudents.map(student => student.id),
       progress:
         project.status === 'Completed'
           ? 100
@@ -48,7 +92,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
       status: '',
       startDate: '',
       endDate: '',
-      students: ''
+      selectedStudents: []
     });
   };
 
@@ -155,15 +199,28 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
             />
           </div>
 
-          <div className="mb-[20px] max-h-[150px] overflow-y-auto">
-            <label className="block mb-[8px] text-[1.1rem] font-bold">Students (IDs, one per line)</label>
-            <textarea
-              name="students"
-              className="w-full p-[12px] bg-[#333] border border-[#666] rounded-[5px] text-white text-[1rem] min-h-[120px] resize-y"
-              value={project.students}
-              onChange={handleChange}
-              placeholder="e.g. 663e2e9b8e2f4b2f8c8e4c1a&#10;663e2e9b8e2f4b2f8c8e4c1b"
-            />
+          <div className="mb-[20px]">
+            <label className="block mb-[8px] text-[1.1rem] font-bold">Students</label>
+            {loading ? (
+              <p className="text-[#ccc]">Loading students...</p>
+            ) : error ? (
+              <p className="text-red-500">Error loading students: {error.message}</p>
+            ) : (
+              <select
+                multiple
+                name="students"
+                className="w-full p-[12px] bg-[#333] border border-[#666] rounded-[5px] text-white text-[1rem] min-h-[120px]"
+                onChange={handleStudentSelect}
+                value={project.selectedStudents.map(student => student.id)}
+              >
+                {availableStudents.map(student => (
+                  <option key={student.id} value={student.id}>
+                    {student.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <p className="text-[#aaa] text-[0.9rem] mt-[5px]">Hold Ctrl/Cmd to select multiple students</p>
           </div>
 
           <div className="mt-[30px]">
