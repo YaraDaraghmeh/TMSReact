@@ -5,6 +5,7 @@ import { graphqlHTTP } from 'express-graphql';
 import { mergeSchemas } from '@graphql-tools/schema';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
+import { JwtPayload } from "jsonwebtoken";
 import { server as WebSocketServer, connection as WebSocketConnection, request as WebSocketRequest } from 'websocket';
 import http from 'http';
 
@@ -56,7 +57,6 @@ app.get('/', (req, res) => {
 
 const server = http.createServer(app);
 
-// WebSocket Setup
 interface ConnectedUser {
   id: string;
   connection: WebSocketConnection;
@@ -71,7 +71,6 @@ const wsServer = new WebSocketServer({
 
 const generateID = () => "id" + Math.random().toString(16).slice(2);
 
-// WebSocket Logic
 wsServer.on("request", function (request: WebSocketRequest) {
   const id = generateID();
   const connection = request.accept(null, request.origin);
@@ -79,7 +78,6 @@ wsServer.on("request", function (request: WebSocketRequest) {
 
   console.log(`✅ WebSocket connected: ${id}`);
 
-  // Broadcast online users to all
   function broadcastOnlineUsers() {
     const onlineUserIds = Object.values(connectedUsers)
       .map((u) => u.userId)
@@ -100,20 +98,37 @@ wsServer.on("request", function (request: WebSocketRequest) {
     try {
       const data = JSON.parse(message.utf8Data || '{}');
 
-      // ✅ تسجيل userId عند الانضمام
       if (data.type === 'join' && data.userId) {
         connectedUsers[id].userId = data.userId;
         broadcastOnlineUsers();
         return;
       }
 
-      // ✅ احتياطي: تسجيل userId عند إرسال أول رسالة
       if (data.fromUserId && !connectedUsers[id].userId) {
         connectedUsers[id].userId = data.fromUserId;
         broadcastOnlineUsers();
       }
 
-      // ✅ إرسال رسالة مع الوقت
+      
+      if (data.type === 'auth' && data.token) {
+  try {
+    const decoded = jwt.verify(data.token, process.env.JWT_SECRET as string) as JwtPayload;
+    connectedUsers[id].userId = (decoded as any)._id || decoded.id;
+    console.log("🔐 Authenticated WebSocket user:", decoded);
+    broadcastOnlineUsers();
+  } catch (err) {
+          console.error("❌ Invalid WebSocket token");
+          connection.sendUTF(JSON.stringify({ type: "error", message: "Unauthorized" }));
+          connection.close(); 
+        }
+        return;
+      }
+
+      if (!connectedUsers[id].userId) {
+        connection.sendUTF(JSON.stringify({ type: "error", message: "Please authenticate first" }));
+        return;
+      }
+
       if (data.type === "message") {
         const { fromUserId, targetUserId, userName, message: msg, id: messageId } = data;
 
@@ -124,7 +139,7 @@ wsServer.on("request", function (request: WebSocketRequest) {
           message: msg,
           fromUserId,
           targetUserId,
-          time: new Date().toISOString(), // ⏰ أضف الوقت هنا
+          time: new Date().toISOString(),
         });
 
         Object.values(connectedUsers).forEach(({ connection, userId }) => {
@@ -134,7 +149,6 @@ wsServer.on("request", function (request: WebSocketRequest) {
         });
       }
 
-      // ✅ مؤشر الكتابة
       else if (data.type === "typing") {
         const { fromUserId, targetUserId, userName } = data;
 
@@ -150,7 +164,6 @@ wsServer.on("request", function (request: WebSocketRequest) {
         });
       }
 
-      // ✅ إشعار القراءة
       else if (data.type === 'read') {
         const receiver = Object.values(connectedUsers).find(u => u.userId === data.toUserId);
         if (receiver) {

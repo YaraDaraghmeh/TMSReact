@@ -59,12 +59,17 @@ const ChatPage = () => {
       Notification.requestPermission();
     }
   }, []);
+const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
   useEffect(() => {
     ws.current = new WebSocket("ws://127.0.0.1:4000");
 
     ws.current.onopen = () => {
       ws.current?.send(JSON.stringify({ type: "join", userId }));
+      ws.current?.send(JSON.stringify({
+    type: "auth",
+    token,
+  }));
     };
 
     ws.current.onmessage = (event) => {
