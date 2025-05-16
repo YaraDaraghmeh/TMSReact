@@ -4,12 +4,14 @@ import {
   GraphQLString,
   GraphQLList,
   GraphQLNonNull,
+  GraphQLID,
+  GraphQLInt
 } from 'graphql';
 import Project from '../schema/Project.js';
 import Task from '../schema/Task.js';
 import Student from '../schema/Student.js';
 
-// 1. نوع الإحصائيات
+
 const StatsType = new GraphQLObjectType({
   name: 'Stats',
   fields: {
@@ -20,7 +22,15 @@ const StatsType = new GraphQLObjectType({
   }
 });
 
-// 2. Root Query
+const StudentTaskStatsType = new GraphQLObjectType({
+  name: 'StudentTaskStats',
+  fields: {
+    pending: { type: GraphQLNonNull(GraphQLInt) },
+    inProgress: { type: GraphQLNonNull(GraphQLInt) },
+    completed: { type: GraphQLNonNull(GraphQLInt) },
+  }
+});
+
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
@@ -37,6 +47,24 @@ const RootQuery = new GraphQLObjectType({
           totalTasks: totalTasks.toString(),
           finishedProjects: finishedProjects.toString(),
           totalStudents: totalStudents.toString(),
+        };
+      }
+    },
+
+    studentTaskStats: {
+      type: StudentTaskStatsType,
+      args: {
+        studentId: { type: GraphQLNonNull(GraphQLID) }
+      },
+      resolve: async (_, { studentId }) => {
+        const pending = await Task.countDocuments({ assignedTo: studentId, status: 'Pending' });
+        const inProgress = await Task.countDocuments({ assignedTo: studentId, status: 'In Progress' });
+        const completed = await Task.countDocuments({ assignedTo: studentId, status: 'Completed' });
+
+        return {
+          pending,
+          inProgress,
+          completed
         };
       }
     }

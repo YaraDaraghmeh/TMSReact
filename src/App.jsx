@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import MainLayout from './Components/MainLayout';
 import ProjectsOverviewPage from './pages/ProjectsOverview';
 import Tasks from './pages/Tasks'
+import ChatPage from './pages/ChatPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/project" element={<ProjectsOverviewPage />} />
             <Route path="/Task" element={<Tasks/>} />
+            <Route path="/chat" element={<ChatPage/>} />
           </Route>
         </Routes>
       </Router>
