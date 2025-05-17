@@ -130,11 +130,11 @@ const Login: React.FC = () => {
           <p className="mt-4 text-sm text-center">
             Don't have an account?{' '}
             <a 
-              href="/signup" 
+              href="/SignUp" 
               className="text-blue-400 hover:underline"
               onClick={(e) => {
                 e.preventDefault();
-                navigate('/signup');
+                navigate('/SignUp');
               }}
             >
               Sign up here

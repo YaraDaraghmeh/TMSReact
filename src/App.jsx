@@ -7,6 +7,7 @@ import MainLayout from './Components/MainLayout';
 import ProjectsOverviewPage from './pages/ProjectsOverview';
 import Tasks from './pages/Tasks'
 import ChatPage from './pages/ChatPage';
+import SignUp from './pages/SignUp';
 
 function App() {
   return (
@@ -15,14 +16,14 @@ function App() {
         <Routes>
           {/* Login */}
           <Route path="/" element={<Login />} />
-
+          <Route path="/SignUp" element={<SignUp />} />
           {/* inside Layout */}
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/project" element={<ProjectsOverviewPage />} />
-            <Route path="/Task" element={<Tasks/>} />
-            <Route path="/chat" element={<ChatPage/>} />
+            <Route path="/Task" element={<Tasks />} />
+            <Route path="/chat" element={<ChatPage />} />
           </Route>
         </Routes>
       </Router>
