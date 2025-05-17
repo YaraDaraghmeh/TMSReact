@@ -172,7 +172,7 @@ useEffect(() => {
       studentData.studentTaskStats.completed ?? 0,
       studentData.studentTaskStats.Cancelled ?? 0,
     ]}
-    backgroundColor={['#eab308', '#3b82f6', '#10b981']} 
+    backgroundColor={['#eab308', '#3b82f6', '#10b981','#ef4444']} 
   />
 )}
 

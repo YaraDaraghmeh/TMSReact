@@ -18,6 +18,7 @@
         pending
         inProgress
         completed
+        Cancelled
       }
     }
   `;
