@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DashboardChart from '../Components/DashboardChart';
 import { useQuery } from '@apollo/client';
-import { DASHBOARD_COUNTS_QUERY, STUDENT_TASK_STATS_QUERY } from '../graphql/queries';
+import { DASHBOARD_COUNTS_QUERY, STUDENT_TASK_STATS_QUERY } from '../graphql/HomeQueries';
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -115,7 +115,7 @@ useEffect(() => {
                 <StatCard title="Pending Tasks" count={0} loading={true} />
                 <StatCard title="In Progress Tasks" count={0} loading={true} />
                 <StatCard title="Completed Tasks" count={0} loading={true} />
-                <StatCard title="cancled Tasks" count={0} loading={true} />
+                <StatCard title="Cancelled Tasks" count={0} loading={true} />
 
               </>
             ) : studentData?.studentTaskStats ? (
@@ -136,8 +136,8 @@ useEffect(() => {
                   loading={false} 
                 />
                 <StatCard 
-                  title="cancled Tasks" 
-                  count={studentData.studentTaskStats.completed ?? 0} 
+                  title="Cancelled Tasks" 
+                  count={studentData.studentTaskStats.Cancelled ?? 0} 
                   loading={false} 
                 />
               </>
@@ -165,14 +165,13 @@ useEffect(() => {
       {isStudent && studentData?.studentTaskStats && (
   <DashboardChart
     user={user}
-    labels={['Pending Tasks', 'In Progress', 'Completed', 'cancled']}
+    labels={['Pending Tasks', 'In Progress', 'Completed', 'Cancelled']}
     data={[
       studentData.studentTaskStats.pending ?? 0,
       studentData.studentTaskStats.inProgress ?? 0,
       studentData.studentTaskStats.completed ?? 0,
-      studentData.studentTaskStats.cancled ?? 0,
+      studentData.studentTaskStats.Cancelled ?? 0,
     ]}
-    backgroundColor={['#eab308', '#3b82f6', '#10b981']} 
   />
 )}
 
