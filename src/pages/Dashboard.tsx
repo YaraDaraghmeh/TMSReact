@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DashboardChart from '../Components/DashboardChart';
 import { useQuery } from '@apollo/client';
-import { DASHBOARD_COUNTS_QUERY, STUDENT_TASK_STATS_QUERY } from '../graphql/queries';
+import { DASHBOARD_COUNTS_QUERY, STUDENT_TASK_STATS_QUERY } from '../graphql/HomeQueries';
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);

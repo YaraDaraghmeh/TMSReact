@@ -1,16 +1,7 @@
   import React, { useState, useEffect, useRef } from "react";
   import { useQuery, gql } from "@apollo/client";
+  import { GET_USERS } from "../graphql/chatQueries";
 
-  const GET_USERS = gql`
-    query {
-      users {
-        id
-        username
-        name
-        role
-      }
-    }
-  `;
 
   interface Message {
     id: string;
