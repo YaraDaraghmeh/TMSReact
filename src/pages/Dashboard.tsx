@@ -115,6 +115,8 @@ useEffect(() => {
                 <StatCard title="Pending Tasks" count={0} loading={true} />
                 <StatCard title="In Progress Tasks" count={0} loading={true} />
                 <StatCard title="Completed Tasks" count={0} loading={true} />
+                <StatCard title="cancled Tasks" count={0} loading={true} />
+
               </>
             ) : studentData?.studentTaskStats ? (
               <>
@@ -130,6 +132,11 @@ useEffect(() => {
                 />
                 <StatCard 
                   title="Completed Tasks" 
+                  count={studentData.studentTaskStats.completed ?? 0} 
+                  loading={false} 
+                />
+                <StatCard 
+                  title="cancled Tasks" 
                   count={studentData.studentTaskStats.completed ?? 0} 
                   loading={false} 
                 />
@@ -158,11 +165,12 @@ useEffect(() => {
       {isStudent && studentData?.studentTaskStats && (
   <DashboardChart
     user={user}
-    labels={['Pending Tasks', 'In Progress', 'Completed']}
+    labels={['Pending Tasks', 'In Progress', 'Completed', 'cancled']}
     data={[
       studentData.studentTaskStats.pending ?? 0,
       studentData.studentTaskStats.inProgress ?? 0,
       studentData.studentTaskStats.completed ?? 0,
+      studentData.studentTaskStats.cancled ?? 0,
     ]}
     backgroundColor={['#eab308', '#3b82f6', '#10b981']} 
   />

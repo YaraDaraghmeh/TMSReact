@@ -59,7 +59,7 @@ const ChatPage = () => {
       Notification.requestPermission();
     }
   }, []);
-const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+const token = sessionStorage.getItem('token');
 
   useEffect(() => {
     ws.current = new WebSocket("ws://127.0.0.1:4000");
@@ -201,9 +201,14 @@ const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
-      <div className="w-1/4 bg-gray-800 p-4 border-r border-gray-700 flex flex-col">
+  <div className="p-4">
+    {/* Main Content */}
+    <div className="flex flex-col md:flex-row gap-6">
+
+      {/* Users List */}
+      <div className="w-full md:w-1/4 bg-gray-800 p-4 rounded-lg border border-gray-700 flex flex-col">
         <h2 className="text-xl font-bold mb-4">المستخدمون</h2>
+
         <select
           className="mb-4 p-2 rounded bg-gray-700 text-white"
           value={targetUserId}
@@ -245,7 +250,8 @@ const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         )}
       </div>
 
-      <div className="flex-1 flex flex-col p-4">
+      {/* Chat Box */}
+      <div className="flex-1 bg-gray-800 shadow-md p-6 flex flex-col rounded-lg h-[80vh]">
         <h2 className="text-xl font-bold mb-4">الدردشة: {userName}</h2>
 
         <div ref={chatBoxRef} onScroll={handleScroll} className="flex-1 border border-gray-700 rounded p-4 mb-4 overflow-y-auto" style={{ backgroundColor: "#1e293b" }}>
@@ -305,8 +311,11 @@ const token = localStorage.getItem('token') || sessionStorage.getItem('token');
           </button>
         </div>
       </div>
+
     </div>
-  );
+  </div>
+);
+
 };
 
 export default ChatPage;
