@@ -29,11 +29,14 @@ const authMiddleware = (req: express.Request, res: express.Response, next: expre
   if (!authHeader) return next();
 
   const token = authHeader.split(' ')[1];
+  console.log('🧪 Received Token:', token); // اطبع التوكن هنا
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
     (req as any).user = decoded;
   } catch (err) {
     console.error('Invalid token:', err);
+    console.log("🔴 Malformed token value:", token);
+
   }
   next();
 };
