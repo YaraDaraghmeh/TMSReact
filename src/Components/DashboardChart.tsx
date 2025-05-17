@@ -9,19 +9,29 @@ interface DashboardChartProps {
   data: number[];
   labels: string[];
   backgroundColor?: string[];
+  borderColor?: string[];
+  borderWidth?: number;
 }
 
 
-export default function DashboardChart({ user, data, labels, backgroundColor }: DashboardChartProps) {
+export default function DashboardChart({ user, data, labels, backgroundColor, borderColor, borderWidth }: DashboardChartProps) {
   const chartData = {
     labels: labels,
     datasets: [
       {
         label: 'Count',
         data: data,
-        backgroundColor: backgroundColor || ['#3467eb', '#ccc', '#252525', '#ccc'],
+        backgroundColor: backgroundColor || ['rgba(44, 93, 99, 0.5)',
+                        'rgba(45, 75, 115, 0.5)',
+                        'rgba(171, 164, 21, 0.3)',
+                        'rgba(88, 64, 105, 0.5)'],
         borderRadius: 4,
         barThickness: 100,
+        borderWidth: 3,
+        borderColor: borderColor || ['rgba(44, 93, 99, 1)',
+                        'rgba(45, 75, 115, 1)',
+                        'rgba(171, 164, 21,1)',
+                        'rgba(88, 64, 105, 1)',]
       },
     ],
   };
@@ -32,13 +42,13 @@ export default function DashboardChart({ user, data, labels, backgroundColor }: 
     maintainAspectRatio: false,
     scales: {
       x: {
-        grid: { color: '#333' },
-        ticks: { color: '#ccc' },
+        grid: { color: 'rgba(1, 1,1, 0.1)'  },
+        ticks: { color: '#999' },
       },
       y: {
         beginAtZero: true,
-        grid: { color: '#333' },
-        ticks: { color: '#ccc' },
+        grid: { color: 'rgba(1, 1,1, 0.1)'  },
+        ticks: { color: '#999' },
       },
     },
     plugins: {

@@ -28,7 +28,7 @@ const StudentTaskStatsType = new GraphQLObjectType({
     pending: { type: GraphQLNonNull(GraphQLInt) },
     inProgress: { type: GraphQLNonNull(GraphQLInt) },
     completed: { type: GraphQLNonNull(GraphQLInt) },
-    cancled: { type: GraphQLNonNull(GraphQLInt) },
+    Cancelled: { type: GraphQLNonNull(GraphQLInt) },
   }
 });
 
@@ -40,7 +40,7 @@ const RootQuery = new GraphQLObjectType({
       resolve: async () => {
         const totalProjects = await Project.countDocuments();
         const totalTasks = await Task.countDocuments();
-        const finishedProjects = await Project.countDocuments({ status: 'finished' });
+        const finishedProjects = await Project.countDocuments({ status: 'Completed' });
         const totalStudents = await Student.countDocuments();
 
         return {
@@ -61,13 +61,13 @@ const RootQuery = new GraphQLObjectType({
         const pending = await Task.countDocuments({ assignedTo: studentId, status: 'Pending' });
         const inProgress = await Task.countDocuments({ assignedTo: studentId, status: 'In Progress' });
         const completed = await Task.countDocuments({ assignedTo: studentId, status: 'Completed' });
-        const cancled = await Task.countDocuments({ assignedTo: studentId, status: 'cancled' });
+        const Cancelled = await Task.countDocuments({ assignedTo: studentId, status: 'Cancelled' });
 
         return {
           pending,
           inProgress,
           completed,
-          cancled
+          Cancelled
         };
       }
     }
