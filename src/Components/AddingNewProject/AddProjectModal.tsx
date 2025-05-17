@@ -42,6 +42,7 @@ const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClose, onAd
     endDate: '',
     selectedStudents: []
   });
+  const [dateError, setDateError] = useState<string>('');
 
   // Fetch students using GraphQL
   const { loading, error, data } = useQuery(GET_ALL_STUDENTS);
@@ -67,6 +68,16 @@ const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClose, onAd
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setDateError('');
+
+    // التحقق من التواريخ
+    const startDate = new Date(project.startDate);
+    const endDate = new Date(project.endDate);
+
+    if (startDate > endDate) {
+      setDateError(' The Start Date Must Be Before The End Date');
+      return;
+    }
 
     const newProject = {
       title: project.title,
@@ -197,6 +208,7 @@ const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClose, onAd
               onChange={handleChange}
               required
             />
+            {dateError && <p className="text-red-500 mt-2">{dateError}</p>}
           </div>
 
           <div className="mb-[20px]">
