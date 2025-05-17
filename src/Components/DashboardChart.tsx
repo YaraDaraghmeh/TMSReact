@@ -14,7 +14,7 @@ interface DashboardChartProps {
 }
 
 
-export default function DashboardChart({ user, data, labels, backgroundColor, borderColor, borderWidth }: DashboardChartProps) {
+export default function DashboardChart({ user, data, labels, backgroundColor, borderColor }: DashboardChartProps) {
   const chartData = {
     labels: labels,
     datasets: [
