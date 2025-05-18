@@ -2,71 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import TaskForm from '../Components/TaskForm';
-
-const GET_TASKS = gql`
-  query GetTasks {
-    tasks {
-      id
-      project {
-        title
-      }
-      name
-      description
-      assignedTo {
-        name
-      }
-      status
-      dueDate
-    }
-    projects {
-      id
-      title
-    }
-    students {
-      id
-      name
-    }
-  }
-`;
-
-const GET_STUDENT_TASKS = gql`
- query GetStudentTasks($studentId: ID!) {
-  studentTasks(studentId: $studentId) {
-    id
-    project {
-      title
-    }
-    name
-    description
-    status
-    dueDate
-    assignedTo {
-      id
-      name
-    }
-  }
-}
-`;
-
-const CREATE_TASK = gql`
-  mutation CreateTask($input: TaskInput!) {
-    createTask(input: $input) {
-      id
-      name
-      status
-    }
-  }
-`;
-
-const UPDATE_TASK_STATUS = gql`
-  mutation UpdateTaskStatus($taskId: ID!, $status: String!) {
-    updateTaskStatus(taskId: $taskId, status: $status) {
-      id
-      status
-    }
-  }
-`;
-
+  import { GET_TASKS,GET_STUDENT_TASKS, CREATE_TASK, UPDATE_TASK_STATUS } from "../graphql/TaskQueries";
+  
 const Tasks: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [userLoaded, setUserLoaded] = useState(false);

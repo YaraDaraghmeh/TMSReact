@@ -1,21 +1,8 @@
 import React, { useState } from 'react';
 import { useMutation, gql, useApolloClient } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
+  import {  LOGIN_MUTATION  } from "../graphql/LoginQueries";
 
-const LOGIN_MUTATION = gql`
-  mutation Login($username: String!, $password: String!) {
-    login(username: $username, password: $password) {
-      token
-      user {
-        id
-        username
-        name
-        role
-        studentId
-      }
-    }
-  }
-`;
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
