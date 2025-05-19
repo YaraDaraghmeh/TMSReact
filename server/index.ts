@@ -14,6 +14,8 @@ import taskSchema from './GraphQl/TaskAPI.js';
 import homeSchema from './GraphQl/HomeAPI.js';
 import ProjectSchema from './GraphQl/ProjectAPI.js';
 import userSchema from './GraphQl/UserAPI.js';
+import SignUpSchema from './GraphQl/SignUpAPI.js'
+import { sign } from 'crypto';
 
 dotenv.config();
 
@@ -45,7 +47,7 @@ app.use(authMiddleware);
 // Merge GraphQL Schemas
 const mergedSchema = mergeSchemas({
 
-  schemas: [loginSchema, taskSchema, homeSchema, userSchema,ProjectSchema],
+  schemas: [loginSchema, taskSchema, homeSchema, userSchema,ProjectSchema, SignUpSchema],
 });
 
 app.use('/graphql', graphqlHTTP((req) => ({
