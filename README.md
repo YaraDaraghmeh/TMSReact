@@ -4,7 +4,7 @@
 
 ### Your Comprehensive Task & Project Management Solution
 
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![TypeScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -20,7 +20,7 @@
 ### 👨‍🎓 For Students
 - **Task Dashboard**: View and manage your assigned tasks
 - **Status Tracking**: Monitor the progress of your tasks (Pending, In Progress, etc.)
-- **Profile Management**: Update your university ID and personal information
+- **Project**: Display all projects for each student
 - **Communication**: Chat with administrators for support and collaboration
 
 ### 👨‍💼 For Administrators
@@ -49,7 +49,7 @@ npm >= 6.0.0
 
 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/yourusername/task-management-system.git
+git clone [https://github.com/yourusername/task-management-system.git](https://github.com/YaraDaraghmeh/TMSReact.git)
 cd task-management-system
 ```
 
@@ -86,31 +86,34 @@ npm run dev
 ## 📁 Project Structure
 
 ```
-task-management-system/
-├── src/
-│   ├── assets/              # Static assets and resources
-│   ├── components/          # Reusable UI components
-│   ├── hooks/               # Custom React hooks
-│   ├── services/            # API and service integrations
-│   ├── pages/               # Main application pages
-│   │   ├── Dashboard/       # Main dashboard interface
-│   │   ├── Login/           # Authentication pages
-│   │   ├── Profile/         # User profile management
-│   │   ├── Tasks/           # Task management interface
-│   │   └── Chat/            # Communication system
-│   ├── layout/
-│   │   ├── Footer/          # Footer component
-│   │   ├── Header/          # Header component
-│   │   └── Sidebar/         # Navigation sidebar
-│   ├── App.js               # Main application component
-│   ├── index.js             # Application entry point
-│   └── utils.js             # Utility functions
-├── public/                  # Public assets
-└── server/                  # Backend code (Phase 3)
-    ├── models/              # Database models
-    ├── routes/              # API endpoints
-    ├── controllers/         # Business logic
-    └── index.js             # Server entry point
+TMSReact/
+├── public/                      # Public assets (favicon, index.html, etc.)
+├── server/                     # Backend (Node.js + Express)
+│   ├── config/                 # Configuration files (e.g., DB connection)
+│   ├── controllers/            # Logic for handling requests (e.g., taskController.js)
+│   ├── models/                 # Database models (e.g., Task.js)
+│   ├── routes/                 # Express routes (e.g., taskRoutes.js)
+│   ├── middleware/             # Middleware functions (e.g., auth)
+│   ├── .env                    # Environment variables
+│   ├── server.js               # Entry point for the backend server
+│   └── package.json            # Backend dependencies
+├── src/                        # Frontend React code
+│   ├── components/             # Reusable UI components
+│   ├── pages/                  # Main application pages (e.g., Dashboard, Login)
+│   ├── services/               # Data-fetching or API service functions
+│   ├── App.jsx                 # Root React component
+│   └── main.jsx                # React entry point
+├── .gitignore                  # Git ignore rules
+├── README.md                   # Project documentation
+├── eslint.config.js            # Linting configuration
+├── index.html                  # Main HTML file
+├── package-lock.json           # Lock file for dependencies
+├── package.json                # Frontend dependencies
+├── postcss.config.cjs          # PostCSS configuration
+├── tailwind.config.cjs         # Tailwind CSS config
+└── vite.config.js              # Vite build configuration
+
+
 ```
 
 ## 📊 Core Features
@@ -123,7 +126,6 @@ task-management-system/
 
 ### User System
 - **Role-Based Access**: Different functionalities for students and administrators
-- **Profile Management**: Update personal information and university ID
 - **Secure Authentication**: Protected routes and user sessions
 
 ### Communication Platform
@@ -131,33 +133,7 @@ task-management-system/
 - **Support System**: Get help and clarification on assigned tasks
 - **Collaboration**: Facilitate teamwork and project coordination
 
-## 🗓️ Project Delivery Milestones
-
-### Phase 1: Front-End Development with Fake Data
-- **Deadline**: March 14, 2025
-- **Focus**: HTML, CSS (LESS), JavaScript, and local storage
-- **Deliverables**: Functional UI with responsive design
-
-### Phase 2: React + Tailwind CSS Implementation
-- **Focus**: React components, Tailwind CSS styling, state management
-- **Deliverables**: Refactored application with enhanced UI/UX
-
-### Phase 3: Node.js Backend and Integration
-- **Deadline**: May 16, 2025
-- **Focus**: Node.js backend, database integration, GraphQL API
-- **Deliverables**: Fully functional application with proper data persistence
-
-## 🤝 Contributing
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-Distributed under the MIT License. See LICENSE for more information.
+س
 
 ---
 
